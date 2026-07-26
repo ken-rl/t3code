@@ -51,6 +51,13 @@ export function useNewThreadHandler() {
         envMode?: DraftThreadEnvMode;
         startFromOrigin?: boolean;
         replace?: boolean;
+        /**
+         * Skip the reusable per-project draft. Dashboard tasks use this so
+         * preparing one task never overwrites another unsent draft.
+         */
+        forceNew?: boolean;
+        /** Seed the new draft composer without submitting it. */
+        initialPrompt?: string;
       },
     ): Promise<void> => {
       const {
@@ -62,6 +69,7 @@ export function useNewThreadHandler() {
         setDraftThreadContext,
         setLogicalProjectDraftThreadId,
         setModelSelection,
+        setPrompt,
       } = useComposerDraftStore.getState();
       const currentRouteTarget = getCurrentRouteTarget();
       // A new thread carries the user's *working mode* from the thread being
@@ -128,7 +136,7 @@ export function useNewThreadHandler() {
           ? getDraftThread(currentRouteTarget.threadRef)
           : getDraftSession(currentRouteTarget.draftId)
         : null;
-      if (reusableStoredDraftThread) {
+      if (reusableStoredDraftThread && options?.forceNew !== true) {
         return (async () => {
           const isDraftAlreadyOpen =
             currentRouteTarget?.kind === "draft" &&
@@ -196,6 +204,9 @@ export function useNewThreadHandler() {
               ...(carryInteractionMode ? { interactionMode: carryInteractionMode } : {}),
             },
           );
+          if (options?.initialPrompt !== undefined) {
+            setPrompt(reusableStoredDraftThread.draftId, options.initialPrompt);
+          }
           if (
             currentRouteTarget?.kind === "draft" &&
             currentRouteTarget.draftId === reusableStoredDraftThread.draftId
@@ -211,6 +222,7 @@ export function useNewThreadHandler() {
       }
 
       if (
+        options?.forceNew !== true &&
         latestActiveDraftThread &&
         currentRouteTarget?.kind === "draft" &&
         latestActiveDraftThread.logicalProjectKey === logicalProjectKey &&
@@ -263,6 +275,9 @@ export function useNewThreadHandler() {
           ...(carryInteractionMode ? { interactionMode: carryInteractionMode } : {}),
         });
         applyStickyState(draftId);
+        if (options?.initialPrompt !== undefined) {
+          setPrompt(draftId, options.initialPrompt);
+        }
         if (carryModelSelection) {
           // After sticky state so the viewed thread's exact selection
           // (model + options like effort and context window) wins over the

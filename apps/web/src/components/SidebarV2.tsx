@@ -26,6 +26,7 @@ import {
   FolderIcon,
   FolderPlusIcon,
   GitBranchIcon,
+  LayoutDashboardIcon,
   EllipsisIcon,
   MessageSquareIcon,
   PlusIcon,
@@ -2237,6 +2238,27 @@ export default function SidebarV2() {
                   </Kbd>
                 ) : null}
               </CommandDialogTrigger>
+            </div>
+            <div className="shrink-0">
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <SidebarMenuButton
+                      size="sm"
+                      type="button"
+                      className="relative size-8 justify-center rounded-md border-0 bg-transparent p-0 text-sidebar-muted-foreground hover:bg-sidebar-row-hover hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+                      onClick={() => {
+                        if (isMobile) setOpenMobile(false);
+                        void router.navigate({ to: "/" });
+                      }}
+                      aria-label="Project dashboard"
+                    />
+                  }
+                >
+                  <LayoutDashboardIcon className="size-4 shrink-0 text-sidebar-muted-foreground/80" />
+                </TooltipTrigger>
+                <TooltipPopup side="right">Project dashboard</TooltipPopup>
+              </Tooltip>
             </div>
             <div className="shrink-0">
               <Tooltip>
